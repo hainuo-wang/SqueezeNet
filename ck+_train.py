@@ -17,7 +17,7 @@ from utils import read_split_data, train_one_epoch, evaluate, plot_accuracy
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_classes', type=int, default=7)
-    parser.add_argument('--epochs', type=int, default=200)
+    parser.add_argument('--epochs', type=int, default=150)
     parser.add_argument('--version', type=str, default="1_0")
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--lr', type=float, default=0.01)

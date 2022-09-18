@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
 import torch.optim.lr_scheduler as lr_scheduler
-from model import SqueezeNet
+from SqueezeNet import SqueezeNet
 from my_dataset import MyDataSetRGB
 from utils import read_split_data, train_one_epoch, evaluate, plot_accuracy
 
@@ -17,12 +17,11 @@ from utils import read_split_data, train_one_epoch, evaluate, plot_accuracy
 def parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_classes', type=int, default=6)
-    parser.add_argument('--epochs', type=int, default=10)
-    parser.add_argument('--version', type=str, default="1_0")
+    parser.add_argument('--epochs', type=int, default=500)
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--lrf', type=float, default=0.1)
-    parser.add_argument('--data-path', type=str, default="KMU-FED")
+    parser.add_argument('--data-path', type=str, default="../data/KMU-FED")
     parser.add_argument('--input_channel', type=int, default=3)
     parser.add_argument('--weights', type=str, default='',
                         help='initial weights path')
@@ -88,7 +87,7 @@ def main(args):
     #     print(x.shape)
     # exit()
     # 如果存在预训练权重则载入
-    model = SqueezeNet(in_channel=3, version=args.version, num_classes=args.num_classes).to(device)
+    model = SqueezeNet(in_channel=3, num_classes=args.num_classes).to(device)
     if args.weights != "":
         if os.path.exists(args.weights):
             weights_dict = torch.load(args.weights, map_location=device)
@@ -106,7 +105,7 @@ def main(args):
                 para.requires_grad_(False)
 
     pg = [p for p in model.parameters() if p.requires_grad]
-    optimizer = optim.SGD(pg, lr=args.lr, momentum=0.9, weight_decay=4E-5)
+    optimizer = optim.Adam(pg, lr=args.lr, weight_decay=4E-5)
     # Scheduler https://arxiv.org/pdf/1812.01187.pdf
     lf = lambda x: ((1 + math.cos(x * math.pi / args.epochs)) / 2) * (1 - args.lrf) + args.lrf  # cosine
     scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
@@ -138,7 +137,7 @@ def main(args):
         tb_writer.add_scalar(tags[2], optimizer.param_groups[0]["lr"], epoch)
 
         torch.save(model.state_dict(), "./weights/model-{}.pth".format(epoch))
-    plot_accuracy(args.epochs, total_accuracy_train, total_accuracy_val, "SqueezeNet_KMU_FED")
+    plot_accuracy(args.epochs, total_accuracy_train, total_accuracy_val, "GhostNet_KMU_FED_Origin")
 
 
 if __name__ == '__main__':
